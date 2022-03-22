@@ -31,11 +31,12 @@ def load_data(dir, config):
     training_set = config["training-set"]
 
     if training_set.lower() == "train":
-        data_frame = pd.read_csv(dir+'/train2.txt', sep='\t')
+        data_frame = pd.read_csv(dir+'/train.txt', sep='\t')
     data_frame_dev = pd.read_csv(dir+'/dev.txt', sep='\t')
     
-    data_frame = filter(data_frame, config)
-    data_frame_dev = filter(data_frame_dev, config)
+    data_frame = data_frame.sample(n=5000, random_state=1)
+    data_frame_dev = data_frame_dev.sample(n=500, random_state=1)
+    print(print(data_frame.groupby("label").count()))
 
     
     return data_frame['premise_nl'], data_frame['hypothesis_nl'], data_frame['label'], data_frame_dev['premise_nl'], data_frame_dev['hypothesis_nl'], data_frame_dev['label']
@@ -52,6 +53,21 @@ def filter(df, config):
      return df
 
 
+def save_dataset(X, Y, model_name):
+
+    """save models prediction as csv file"""
+    os.chdir('../Data/split_dataset')
+    df = pd.DataFrame()
+    df['Document'] = X
+    df['Label'] = Y
+
+    #save output in directory
+    try:
+        df.to_csv(model_name+".csv", index=False)
+        
+    except OSError as error:
+        df.to_csv(model_name+".csv", index=False)
+    os.chdir('../../LM')
    
 
 def classifier(X_train_p, X_train_h, X_dev_p, X_dev_h, Y_train, Y_dev, config, model_name):
@@ -77,6 +93,13 @@ def classifier(X_train_p, X_train_h, X_dev_p, X_dev_h, Y_train, Y_dev, config, m
         optim = Adam(learning_rate=learning_rate)
     elif config['optimizer'].upper() == "SGD":
         optim = SGD(learning_rate=learning_rate)
+
+  #  if config["model"].upper() =='BERT':
+  #      lm = 'bert-base-uncased'
+  #  elif config["model"].upper() =='XLNET':
+  #      lm = 'xlnet-base-cased'
+  #  elif config["model"].upper() =='ERNIE':
+       # lm = 'nghuyong/ernie-2.0-en'
         
     #nli_model = AutoModelForSequenceClassification.from_pretrained('facebook/bart-large-mnli')
     tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
@@ -85,22 +108,25 @@ def classifier(X_train_p, X_train_h, X_dev_p, X_dev_h, Y_train, Y_dev, config, m
 
 
     # get transformer text classification model based on pre-trained model
-    model = TFAutoModelForSequenceClassification.from_pretrained('bert-base-uncased')
+    model = TFAutoModelForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=3)
     X_train = []
     X_dev = []
     #.encode('ascii', 'ignore').decode('ascii')
     for i,j in zip(X_train_p,X_train_h):
+        #X_train.append(f"{i} </s></s> {j}")
         d = []
         d.append(""+i)
         d.append(""+j)
         X_train.append(d)
     for i,j in zip(X_dev_p, X_dev_h):
+       # X_dev.append(f"{i} </s></s> {j}")
         d = []
         d.append(""+i)
         d.append(""+j)
         X_dev.append(d)
     
     
+
 
     # transform raw texts into model input
     tokens_train = tokenizer(X_train,padding=True,truncation=True, return_tensors="np").data
@@ -111,8 +137,10 @@ def classifier(X_train_p, X_train_h, X_dev_p, X_dev_h, Y_train, Y_dev, config, m
 
 
     #convert Y into one hot encoding
-    Y_train = tf.one_hot(Y_train.tolist(),depth=2)
-    Y_dev = tf.one_hot(Y_dev.tolist(),depth=2)
+
+    Y_train = tf.one_hot(Y_train.tolist(),depth=3)
+    Y_dev = tf.one_hot(Y_dev.tolist(),depth=3)
+
 
     model.compile(loss=loss_function, optimizer=optim, metrics=['accuracy'])
 
@@ -166,6 +194,11 @@ def main():
 
     #get parameters for experiments
     config, model_name = utils.get_config()
+    #mat = load_data(utils.DATA_DIR, config)
+    #print(mat.columns)
+    #new_mat =  filter(mat, config)
+    #print(filter(mat, config))
+    #print(new_mat["da_premise"])
     
     
     if config['training-set'] != 'trial':
@@ -176,12 +209,14 @@ def main():
     X_train_p, X_train_h, Y_train, X_dev_p, X_dev_h, Y_dev = load_data(utils.DATA_DIR, config)
     #run model
 
+
     classifier(X_train_p, X_train_h, X_dev_p, X_dev_h, Y_train, Y_dev, config, model_name)
 
   
 
 if __name__ == "__main__":
     main()
+
 
 
 

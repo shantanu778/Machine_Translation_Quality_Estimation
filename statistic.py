@@ -48,6 +48,8 @@ def main():
     df, df_dev = load_data(utils.DATA_DIR, config)
     #run model
     print(df[["da_premise","mqm_premise", "da_hypothesis","mqm_hypothesis"]].describe())
+    print(df.groupby("label").count())
+
 
 
   
