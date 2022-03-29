@@ -34,9 +34,12 @@ def load_data(dir, config):
         data_frame = pd.read_csv(dir+'/train.txt', sep='\t')
     data_frame_dev = pd.read_csv(dir+'/dev.txt', sep='\t')
     
-    data_frame = data_frame.sample(n=5000, random_state=1)
-    data_frame_dev = data_frame_dev.sample(n=500, random_state=1)
-    print(print(data_frame.groupby("label").count()))
+    data_frame = data_frame.sample(n=20000, random_state=1)
+    data_frame_dev = data_frame_dev.sample(n=2000, random_state=1)
+    
+    save_dataset(data_frame['premise_nl'], data_frame['hypothesis_nl'], data_frame['label'], "train_baseline_50k.txt")
+    save_dataset(data_frame_dev['premise_nl'], data_frame_dev['hypothesis_nl'], data_frame_dev['label'], "dev_baseline_5k.txt")
+    print(data_frame.groupby("label").count())
 
     
     return data_frame['premise_nl'], data_frame['hypothesis_nl'], data_frame['label'], data_frame_dev['premise_nl'], data_frame_dev['hypothesis_nl'], data_frame_dev['label']
@@ -46,20 +49,20 @@ def filter(df, config):
      translation = config["translation"]
      threshold = config["threshold"]
      
-     #df = df[f'{quality_estimation}_{translation}' > threshold]
      query = f"{quality_estimation}_{translation} < {threshold}"
      df = df.query(query)
      
      return df
 
 
-def save_dataset(X, Y, model_name):
+def save_dataset(premise, hypothesis, label, model_name):
 
     """save models prediction as csv file"""
-    os.chdir('../Data/split_dataset')
+    os.chdir('Data')
     df = pd.DataFrame()
-    df['Document'] = X
-    df['Label'] = Y
+    df['Premise'] = premise
+    df['Hypothesis'] = hypothesis
+    df['label'] = label
 
     #save output in directory
     try:
@@ -67,7 +70,7 @@ def save_dataset(X, Y, model_name):
         
     except OSError as error:
         df.to_csv(model_name+".csv", index=False)
-    os.chdir('../../LM')
+    os.chdir('..')
    
 
 def classifier(X_train_p, X_train_h, X_dev_p, X_dev_h, Y_train, Y_dev, config, model_name):
@@ -94,14 +97,6 @@ def classifier(X_train_p, X_train_h, X_dev_p, X_dev_h, Y_train, Y_dev, config, m
     elif config['optimizer'].upper() == "SGD":
         optim = SGD(learning_rate=learning_rate)
 
-  #  if config["model"].upper() =='BERT':
-  #      lm = 'bert-base-uncased'
-  #  elif config["model"].upper() =='XLNET':
-  #      lm = 'xlnet-base-cased'
-  #  elif config["model"].upper() =='ERNIE':
-       # lm = 'nghuyong/ernie-2.0-en'
-        
-    #nli_model = AutoModelForSequenceClassification.from_pretrained('facebook/bart-large-mnli')
     tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
 
     # set tokenizer according to pre-trained model
@@ -183,7 +178,7 @@ def set_log(model_name):
 def main():
 
     #enable memory growth for a physical device so that the runtime initialization will not allocate all memory on the device 
-    #physical_devices = tf.config.experimental.list_physical_devices('GPU')
+    physical_devices = tf.config.experimental.list_physical_devices('GPU')
     
     device_name = tf.test.gpu_device_name()
     if device_name != '/device:GPU:0':
@@ -192,13 +187,9 @@ def main():
 
 
 
+
     #get parameters for experiments
     config, model_name = utils.get_config()
-    #mat = load_data(utils.DATA_DIR, config)
-    #print(mat.columns)
-    #new_mat =  filter(mat, config)
-    #print(filter(mat, config))
-    #print(new_mat["da_premise"])
     
     
     if config['training-set'] != 'trial':
@@ -216,7 +207,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-

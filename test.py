@@ -18,6 +18,22 @@ import utils
 import argparse
 
 
+
+def create_arg_parser():
+
+    '''Returns a map with commandline parameters taken from the user'''
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-ts",
+        "--testset",
+        default="24",
+        type=str,
+        help="define the test set. By default it uses "
+             "the 24th meeting as test set. Input "
+             " '25' to use the 25th meeting as test set."
+        )
+
+    args = parser.parse_args()
+    return args
     
 
 def load_data(dir, config):
@@ -129,6 +145,8 @@ def main():
     #set log settings
     set_log(model_name)
 
+    args = create_arg_parser()
+
     #load data from train-test-dev folder
     X_train_a, X_train_b, Y_train = load_data(utils.DATA_DIR,args.testset)
     Y_test, Y_pred = test(X_train_a, X_train_b, Y_train, config, model_name)
@@ -140,4 +158,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
