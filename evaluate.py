@@ -17,7 +17,7 @@ def save_results(Y_test, Y_pred, model_name):
 
     result = {"Model": model_name}
 
-    labels = list(test_report.keys())[:2]
+    labels = list(test_report.keys())[:3]
 
     for label in labels:
         result["precision-"+label] = test_report[label]['precision']
@@ -37,10 +37,10 @@ def save_results(Y_test, Y_pred, model_name):
         df.to_csv(utils.OUTPUT_DIR+"RESULTS.csv",index=False)
 
     # save the confusion matrix of the model in png file
-    cm = confusion_matrix(Y_test, Y_pred)
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
-    disp.plot()
-    plt.savefig(utils.OUTPUT_DIR+"{}.png".format(model_name))
+    #cm = confusion_matrix(Y_test, Y_pred)
+    #disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
+    #disp.plot()
+    #plt.savefig(utils.OUTPUT_DIR+"{}.png".format(model_name))
 
     # Obtain the accuracy score of the model
     acc = accuracy_score(Y_test, Y_pred)

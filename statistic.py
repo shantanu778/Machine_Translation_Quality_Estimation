@@ -38,10 +38,17 @@ def showdata(df, column):
     threshold = 0.05
     print(column)
     while threshold < 1:
-        query = f"{column} < {threshold}"
-        query2 = f"{column} > {threshold-0.05}"
+        query = f"{column}_premise < {threshold}"
+        query2 = f"{column}_premise > {threshold-0.05}"
+        
+        query3 = f"{column}_hypothesis < {threshold}"
+        query4 = f"{column}_hypothesis > {threshold-0.05}"
+        
         df2 = df.query(query)
         df2 = df2.query(query2)
+        
+        df2 = df2.query(query3)
+        df2 = df2.query(query4)
         print(f"between {round(threshold-0.05,2)} and {round(threshold,2)} -- {df2.shape[0]}")
         threshold = threshold+ 0.05
 
@@ -61,10 +68,9 @@ def main():
     print(df[["da_premise","mqm_premise", "da_hypothesis","mqm_hypothesis"]].describe())
     print(df.groupby("label").count())
     
-    print(showdata(df, "da_premise"))
-    print(showdata(df, "mqm_premise"))
-    print(showdata(df, "da_hypothesis"))
-    print(showdata(df, "mqm_hypothesis"))
+    print(showdata(df, "da"))
+    print(showdata(df, "mqm"))
+
 
 
 

@@ -34,11 +34,20 @@ def load_data(dir, config):
         data_frame = pd.read_csv(dir+'/train.txt', sep='\t')
     data_frame_dev = pd.read_csv(dir+'/dev.txt', sep='\t')
     
+
+    
+    data_frame = filter(data_frame, config)
+    print(data_frame["da_premise"])
+    print(data_frame["da_hypothesis"])
+
+    
     data_frame = data_frame.sample(n=20000, random_state=1)
     data_frame_dev = data_frame_dev.sample(n=2000, random_state=1)
     
-    save_dataset(data_frame['premise_nl'], data_frame['hypothesis_nl'], data_frame['label'], "train_baseline_50k.txt")
-    save_dataset(data_frame_dev['premise_nl'], data_frame_dev['hypothesis_nl'], data_frame_dev['label'], "dev_baseline_5k.txt")
+    threshold = config["threshold"]
+    
+    save_dataset(data_frame['premise_nl'], data_frame['hypothesis_nl'], data_frame['label'], f"train_{threshold}.txt")
+    save_dataset(data_frame_dev['premise_nl'], data_frame_dev['hypothesis_nl'], data_frame_dev['label'], f"dev_{threshold}.txt")
     print(data_frame.groupby("label").count())
 
     
@@ -48,11 +57,27 @@ def filter(df, config):
      quality_estimation = config["quality-estimation"]
      translation = config["translation"]
      threshold = config["threshold"]
-     
-     query = f"{quality_estimation}_{translation} < {threshold}"
-     df = df.query(query)
+     if translation == "both":
+         query = f"{quality_estimation}_premise < {threshold}"
+         query2 = f"{quality_estimation}_hypothesis  < {threshold}"
+         df = df.query(query)
+         print(df.shape)
+         df = df.query(query2)
+         print(df.shape)
+         
+         query3 = f"{quality_estimation}_premise > {threshold-0.25}"
+         query4 = f"{quality_estimation}_hypothesis  > {threshold-0.25}"
+         df = df.query(query3)
+         print(df.shape)
+         df = df.query(query4)
+         print(df.shape)
+         
+
+     print(df.shape)
      
      return df
+
+
 
 
 def save_dataset(premise, hypothesis, label, model_name):
@@ -207,3 +232,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
