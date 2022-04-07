@@ -35,19 +35,25 @@ def load_data(dir, config):
     data_frame_dev = pd.read_csv(dir+'/dev.txt', sep='\t')
     
 
-    
-    data_frame = filter(data_frame, config)
-    print(data_frame["da_premise"])
-    print(data_frame["da_hypothesis"])
+    if not config["random"]:
+        data_frame = filter(data_frame, config)
+        print(data_frame["da_premise"])
+        print(data_frame["da_hypothesis"])
+        data_frame = data_frame.sample(n=config["train_size"], random_state=1)
+        data_frame_dev = data_frame_dev.sample(n=config["dev_size"], random_state=1)
 
-    
-    data_frame = data_frame.sample(n=20000, random_state=1)
-    data_frame_dev = data_frame_dev.sample(n=2000, random_state=1)
-    
-    threshold = config["threshold"]
-    
-    save_dataset(data_frame['premise_nl'], data_frame['hypothesis_nl'], data_frame['label'], f"train_{threshold}.txt")
-    save_dataset(data_frame_dev['premise_nl'], data_frame_dev['hypothesis_nl'], data_frame_dev['label'], f"dev_{threshold}.txt")
+        threshold = config["threshold"]
+
+        save_dataset(data_frame['premise_nl'], data_frame['hypothesis_nl'], data_frame['label'], f"train_{threshold}.txt")
+        save_dataset(data_frame_dev['premise_nl'], data_frame_dev['hypothesis_nl'], data_frame_dev['label'], f"dev_{threshold}.txt")
+
+    else:
+        data_frame = data_frame.sample(n=config["train_size"], random_state=1)
+        data_frame_dev = data_frame_dev.sample(n=config["dev_size"], random_state=1)
+
+        save_dataset(data_frame['premise_nl'], data_frame['hypothesis_nl'], data_frame['label'], f'train_random_{config["train_size"]}.txt')
+        save_dataset(data_frame_dev['premise_nl'], data_frame_dev['hypothesis_nl'], data_frame_dev['label'], f'dev_random_{config["dev_size"]}.txt')
+
     print(data_frame.groupby("label").count())
 
     
@@ -224,7 +230,7 @@ def main():
 
     X_train_p, X_train_h, Y_train, X_dev_p, X_dev_h, Y_dev = load_data(utils.DATA_DIR, config)
     #run model
-
+    print(f"Train Size: {len(Y_train)} Dev Size: {len(Y_dev)}")
 
     classifier(X_train_p, X_train_h, X_dev_p, X_dev_h, Y_train, Y_dev, config, model_name)
 

@@ -15,6 +15,7 @@ def get_config():
             configs = json.load(file)
             vals = [str(v).upper() for v in configs.values()]
             model_name = "_".join(vals[:-1])
+            print(model_name)
         return configs, model_name
     except FileNotFoundError as error:
         print(error)
