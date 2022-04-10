@@ -67,7 +67,7 @@ If you want to run the an experiment follow these steps testing a training model
   evaluate.py
   ```
 To use differen quality threshold, follow these steps:
-* step 1: open config_.json
+* step 1: open config.json
 * set "task" to 2
 * step 2:run
  ```
