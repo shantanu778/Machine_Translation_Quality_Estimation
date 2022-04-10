@@ -1,0 +1,20 @@
+{
+
+   
+    "model": "BERT",
+    "max_length" : 100,
+    "learning_rate": 1e-5,
+    "epochs": 4,
+    "patience": 2,
+    "batch_size": 16,
+    "loss": "Categorical",
+    "optimizer": "adam",
+    "training-set": "train",
+    "seed": 1234,
+    "quality-estimation":"da",
+    "threshold":0.75,
+    "translation":"english",
+    "task":1
+
+
+}
