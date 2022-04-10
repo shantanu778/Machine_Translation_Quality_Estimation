@@ -47,38 +47,37 @@ If you want to run the an experiment follow these steps:
   evaluate.py 
   ```
   
-  ### Trade-off between data quantity and data
-quality
+  ### Trade-off between data quantity and data quality
 
 If you want to run the an experiment follow these steps testing a training model using train sets of different sizes, follow these steps:
 
-* step 1: open config.json
-* for BERT (full dataset): set "model" value to "BERT"
-* for ERNIE (full dataset): set "model" value to "ERNIE"
+* step 1: open config_quantity.json
+*  use the keys "train_size" and "dev_size" to set the sizes of the train and dev set
 * step 2:run
  ```
-  train_reg.py
+  train_quantity.py
   ```
   * step 3:run
  ```
   test.py
   ```
-  Go to Output directory
+
   * step 4:run
  ```
-  rho.py
+  evaluate.py
   ```
-To run the third BERT model (using only train set), first go to the Models/LM/src directory.
-* step 1:run
+To use differen quality threshold, follow these steps:
+* step 1: open config_.json
+* set "task" to 2
+* step 2:run
  ```
-  train_reg.py config_11_reg.json
+  train.py
   ```
   * step 3:run
  ```
-  test_reg.py config_11_reg.json
+  test.py
   ```
-  Go to Output directory
   * step 4:run
  ```
-  rho.py 
+  evaluate.py
 
